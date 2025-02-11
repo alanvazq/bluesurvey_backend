@@ -33,7 +33,10 @@ router.delete('/questions/:id', authenticate(), surveyController.deleteQuestion)
 router.get('/form/:id', authenticate(false), surveyController.getSurveyById);
 //Guardar respuestas de los usuarios
 router.post('/form', authenticate(false), surveyController.saveAnswers);
-
+//Refresh token
+router.post('/refresh-token', userController.refreshToken);
+//Cerrar sesión
+// router.post()
 
 module.exports = router;
 

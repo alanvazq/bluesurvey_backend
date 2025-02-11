@@ -1,19 +1,19 @@
 const User = require('../models/user');
-const createAccessToken = require('../auth/generateToken')
+const { generateAccessToken, generateRefreshToken } = require('../auth/generateToken');
 const Role = require('../models/role');
-
+const getUserInfo = require("../libs/getUserInfo");
+const getTokenFromHeader = require('../auth/getTokenFromHeader');
+const token = require('../models/token');
+const { verifyRefreshToken } = require('../auth/verifyToken');
 const signUp = async (req, res) => {
 
-    const { username, email, password } = req.body;
-    if (!!!username || !!!email || !!!password) {
+    const { name, email, password } = req.body;
+    if (!!!name || !!!email || !!!password) {
         return res.status(400).json({
             error: 'Todos los campos son requeridos'
         });
     }
-
-    //Crear el usuario
     try {
-        //Verificar si existe el usuario
         const user = new User();
         const exists = await user.userExist(email);
 
@@ -25,7 +25,7 @@ const signUp = async (req, res) => {
 
         const role = await Role.findOne({ name: 'user' })
 
-        const newUser = new User({ username, email, password: await User.encryptPassword(password), roles: [role._id] });
+        const newUser = new User({ name, email, password: await User.encryptPassword(password), roles: [role._id] });
         newUser.save();
         res.status(201).json({
             message: 'Usuario creado correctamente'
@@ -45,6 +45,7 @@ const signIn = async (req, res) => {
             error: 'Todos los campos son requeridos'
         })
     }
+
     const user = await User.findOne({ email }).populate('roles');
 
     if (user) {
@@ -53,25 +54,17 @@ const signIn = async (req, res) => {
 
         if (correctPassword) {
 
-            const userInfo = {
-                id: user._id,
-                username: user.username,
-                email: user.email,
-                roles: user.roles,
-            }
+            const accessToken = user.createAccessToken();
+            const refreshToken = await user.createRefreshToken();
 
-            const accessToken = createAccessToken(userInfo);
-
-            const userInfoUpdated = {
-                ...userInfo, token: accessToken,
-            };
-            res.status(200).json(userInfoUpdated);
+            res.status(200).json({ user: getUserInfo(user), accessToken, refreshToken });
 
         } else {
             res.status(401).json({
                 error: 'Correo o contraseña incorrecto'
             });
         }
+
     } else {
         res.status(404).json({
             error: 'Usuario no econtrado'
@@ -81,18 +74,7 @@ const signIn = async (req, res) => {
 
 const getUser = (req, res) => {
     try {
-        const { id, username, email, password, roles } = req.user;
-
-        const token = createAccessToken({ id, username, email, password, roles })
-
-        res.status(200).json({
-            id: id,
-            email: email,
-            username: username,
-            roles: roles,
-            token: token,
-
-        })
+       res.status(200).json(req.user)
     } catch (error) {
         res.status(500).json({
             message: 'Error al obtener datos'
@@ -121,4 +103,31 @@ const getAllUsers = async (req, res) => {
     }
 }
 
-module.exports = { signUp, signIn, getUser, getAllUsers }
+const refreshToken = async (req, res) => {
+    const refreshToken = getTokenFromHeader(req.headers);
+    if (refreshToken) {
+        try {
+            const found = await token.findOne({ token: refreshToken });
+            if (!found) return res.status(401).json({ error: 'No autorizado' })
+
+            const payload = verifyRefreshToken(found.token);
+
+            if (payload) {
+                const accessToken = generateAccessToken(payload.user);
+                console.log(accessToken)
+                return res.status(200).json({ accessToken });
+            } else {
+                return res.status(401).json({ error: 'No autorizado' })
+            }
+
+        } catch (error) {
+            console.log(error)
+            return res.status(401).json({ error: 'No autorizado' })
+        }
+
+    } else {
+        res.status(401).json({ error: "No autorizado" })
+    }
+}
+
+module.exports = { signUp, signIn, getUser, getAllUsers, refreshToken }

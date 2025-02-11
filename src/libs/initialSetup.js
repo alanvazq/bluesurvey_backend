@@ -20,9 +20,9 @@ const createRoles = async () => {
             const role = await Role.findOne({ name: 'admin' })
 
             const newAdmin = new User({
-                email: 'admin@bluesurvey.com',
-                username: 'administrador',
-                password: await User.encryptPassword('B74s32y95'),
+                name: process.env.ADMIN_NAME,
+                email: process.env.ADMIN_EMAIL,
+                password: await User.encryptPassword(process.env.ADMIN_PASSWORD),
                 roles: [role._id],
             });
 

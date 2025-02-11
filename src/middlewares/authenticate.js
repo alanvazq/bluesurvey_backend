@@ -1,5 +1,5 @@
 const getTokenFromHeader = require("../auth/getTokenFromHeader");
-const verifyToken = require("../auth/verifyToken");
+const {verifyAccessToken} = require("../auth/verifyToken");
 
 const authenticate = (requireAuth = true) => (req, res, next) => {
 
@@ -11,7 +11,7 @@ const authenticate = (requireAuth = true) => (req, res, next) => {
     const token = getTokenFromHeader(req.headers);
 
     if (token) {
-        const decoded = verifyToken(token);
+        const decoded = verifyAccessToken(token);
         if (decoded) {
             req.user = { ...decoded };
             next();
