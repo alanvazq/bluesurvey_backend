@@ -83,7 +83,6 @@ const getUser = (req, res) => {
 }
 
 const getAllUsers = async (req, res) => {
-
     try {
 
         const users = await User.find();
@@ -114,7 +113,6 @@ const refreshToken = async (req, res) => {
 
             if (payload) {
                 const accessToken = generateAccessToken(payload.user);
-                console.log(accessToken)
                 return res.status(200).json({ accessToken });
             } else {
                 return res.status(401).json({ error: 'No autorizado' })

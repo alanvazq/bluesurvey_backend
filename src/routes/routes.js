@@ -16,7 +16,7 @@ router.get('/users', authenticate(), userController.getAllUsers);
 //Crear encuestas
 router.post('/surveys', authenticate(), surveyController.createSurvey);
 //Crear preguntas
-router.post('/surveys/questions/:id', authenticate(), surveyController.createQuestion);
+router.post('/surveys/:id/questions', authenticate(), surveyController.createQuestion);
 //Obtener encuestas
 router.get('/surveys', authenticate(), surveyController.getSurveys);
 //Obtener encuesta por Id

@@ -1,31 +1,24 @@
 const getTokenFromHeader = require("../auth/getTokenFromHeader");
-const {verifyAccessToken} = require("../auth/verifyToken");
+const { verifyAccessToken } = require("../auth/verifyToken");
 
 const authenticate = (requireAuth = true) => (req, res, next) => {
-
-    if(!requireAuth) {
-        next();
-        return;
+    if (!requireAuth) {
+        return next();
     }
 
     const token = getTokenFromHeader(req.headers);
 
-    if (token) {
-        const decoded = verifyAccessToken(token);
-        if (decoded) {
-            req.user = { ...decoded };
-            next();
-        } else {
-            res.status(401).json({
-                message: 'No autorizado'
-            })
-        }
-    } else {
-        res.status(401).json({
-            message: 'No autorizado'
-        })
+    if (!token) {
+        return res.status(401).json({ message: "No autorizado" });
     }
-}
+    try {
+        const decoded = verifyAccessToken(token);
+        req.user = { ...decoded.user };
+        next();
+    } catch (error) {
 
+        return res.status(401).json({ message: "No autorizado" });
+    }
+};
 
 module.exports = authenticate;

@@ -4,15 +4,12 @@ const User = require('../models/user');
 
 const createSurvey = async (req, res) => {
     const { title, description } = req.body;
-
     if (!!!title || !!!description) {
         res.status(400).json({
             message: 'Todos los campos son requeridos'
         });
-
         return;
     }
-
     try {
 
         const survey = Survey({ title, description, idUser: req.user.id })
@@ -21,7 +18,6 @@ const createSurvey = async (req, res) => {
         await User.findByIdAndUpdate(req.user.id,
             { $push: { surveys: newSurvey._id } },
             { new: true })
-
 
         res.status(200).json(newSurvey);
 
@@ -168,8 +164,6 @@ const deleteSurvey = async (req, res) => {
         });
     }
 }
-
-
 
 const deleteQuestion = async (req, res) => {
     const { id } = req.params;
