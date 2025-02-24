@@ -68,7 +68,7 @@ const createQuestion = async (req, res) => {
 
 const getSurveys = async (req, res) => {
 
-    const surveys = await Survey.find({ idUser: req.user.id }).populate('questions')
+    const surveys = await Survey.find({ idUser: req.user.id })
     if (surveys) {
         res.status(200).json(surveys)
     } else {
@@ -108,12 +108,12 @@ const updateSurvey = async (req, res) => {
 
 const updateQuestion = async (req, res) => {
     const { id } = req.params;
-    const { question, answers, surveyId } = req.body;
+    const { questionId, answers, question, typeQuestion } = req.body;
 
     try {
 
-        await Question.findByIdAndUpdate(id, { question, answers }, { new: true });
-        const updatedSurvey = await Survey.findById(surveyId).populate('questions');
+        await Question.findByIdAndUpdate(questionId, { question, answers, typeQuestion }, { new: true });
+        const updatedSurvey = await Survey.findById(id).populate('questions');
         if (updatedSurvey) {
             res.status(200).json(updatedSurvey);
         } else {
@@ -166,11 +166,10 @@ const deleteSurvey = async (req, res) => {
 }
 
 const deleteQuestion = async (req, res) => {
-    const { id } = req.params;
-    const { idSurvey } = req.body;
+    const { surveyId, questionId } = req.params;
 
     try {
-        const deleteQuestion = await Question.findByIdAndDelete(id);
+        const deleteQuestion = await Question.findByIdAndDelete(questionId);
 
 
         if (!deleteQuestion) {
@@ -180,14 +179,15 @@ const deleteQuestion = async (req, res) => {
         }
 
         const updatedSurvey = await Survey.findByIdAndUpdate(
-            idSurvey,
-            { $pull: { questions: id } },
+            surveyId,
+            { $pull: { questions: questionId } },
             { new: true }
         ).populate('questions');
 
         res.status(200).json(updatedSurvey);
 
     } catch (error) {
+        console.log(error)
         res.status(500).json({
             error: 'Error al eliminar la pregunta'
         })

@@ -24,11 +24,11 @@ router.get('/surveys/:id', authenticate(), surveyController.getSurveyById);
 //Actualizar encuesta
 router.put('/surveys/:id', authenticate(), surveyController.updateSurvey);
 //Actualiar pregunta
-router.put('/questions/:id', authenticate(), surveyController.updateQuestion);
+router.put('/surveys/:id/questions', authenticate(), surveyController.updateQuestion);
 //Eliminar encuestas
 router.delete('/surveys/:id', authenticate(), surveyController.deleteSurvey);
 //Eliminar pregunta
-router.delete('/questions/:id', authenticate(), surveyController.deleteQuestion);
+router.delete('/surveys/:surveyId/questions/:questionId', authenticate(), surveyController.deleteQuestion);
 //Obtener encuestas para formulario
 router.get('/form/:id', authenticate(false), surveyController.getSurveyById);
 //Guardar respuestas de los usuarios
