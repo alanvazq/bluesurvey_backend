@@ -51,12 +51,13 @@ const createQuestion = async (req, res) => {
         const newQuestion = Question({ typeQuestion, question, answers, idUser: req.user.id, idSurvey: req.params.id })
         const questionSaved = await newQuestion.save();
 
-        const updatedSurvey = await Survey.findByIdAndUpdate(
+
+        await Survey.findByIdAndUpdate(
             req.params.id,
             { $push: { questions: questionSaved._id } },
             { new: true }).populate('questions');
 
-        res.status(200).json(updatedSurvey);
+        res.status(200).json(questionSaved);
 
     } catch (error) {
         res.status(500).json({
@@ -109,13 +110,12 @@ const updateSurvey = async (req, res) => {
 const updateQuestion = async (req, res) => {
     const { id } = req.params;
     const { questionId, answers, question, typeQuestion } = req.body;
-
     try {
 
         await Question.findByIdAndUpdate(questionId, { question, answers, typeQuestion }, { new: true });
-        const updatedSurvey = await Survey.findById(id).populate('questions');
-        if (updatedSurvey) {
-            res.status(200).json(updatedSurvey);
+        const questionUpdated = await Question.findById(questionId);
+        if (questionUpdated) {
+            res.status(200).json(questionUpdated);
         } else {
             res.status(404).json({
                 message: 'Encuestas no encontradas'
@@ -123,6 +123,7 @@ const updateQuestion = async (req, res) => {
         }
 
     } catch (error) {
+        console.log(error)
         res.status(500).json({
             error: 'Error al actualizar la pregunta'
         });
@@ -170,7 +171,6 @@ const deleteQuestion = async (req, res) => {
 
     try {
         const deleteQuestion = await Question.findByIdAndDelete(questionId);
-
 
         if (!deleteQuestion) {
             return res.status(404).json({
