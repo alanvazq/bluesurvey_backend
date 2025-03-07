@@ -196,11 +196,11 @@ const deleteQuestion = async (req, res) => {
 
 const saveAnswers = async (req, res) => {
 
-    const { responses } = req.body;
+    const { answers } = req.body;
 
     try {
 
-        for (const openResponse of responses.open) {
+        for (const openResponse of answers.open) {
             const question = await Question.findById(openResponse.questionId);
             if (question) {
                 const existingAnswer = question.answers.find((a) => a.answer === openResponse.answer);
@@ -213,7 +213,7 @@ const saveAnswers = async (req, res) => {
             }
         }
 
-        for (const singleOptionResponse of responses.singleOption) {
+        for (const singleOptionResponse of answers.singleOption) {
             const question = await Question.findById(singleOptionResponse.questionId);
             if (question) {
                 const answerIndex = question.answers.findIndex((a) => a.answer === singleOptionResponse.answer);
@@ -224,7 +224,7 @@ const saveAnswers = async (req, res) => {
             }
         }
 
-        for (const multipleOptionResponse of responses.multipleOption) {
+        for (const multipleOptionResponse of answers.multipleOption) {
             const question = await Question.findById(multipleOptionResponse.questionId);
             if (question) {
                 multipleOptionResponse.answers.forEach((selectedAnswer) => {

@@ -35,6 +35,12 @@ router.get('/form/:id', authenticate(false), surveyController.getSurveyById);
 router.post('/form', authenticate(false), surveyController.saveAnswers);
 //Refresh token
 router.post('/refresh-token', userController.refreshToken);
+//Obtener formulario publico
+router.get('/public/surveys/:id', authenticate(false),  surveyController.getSurveyById);
+//Guardar respuestas
+router.post('/public/surveys', authenticate(false), surveyController.saveAnswers);
+
+
 //Cerrar sesión
 // router.post()
 
