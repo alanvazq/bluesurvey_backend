@@ -6,7 +6,7 @@ const createSurvey = async (req, res) => {
     const { title, description } = req.body;
     if (!!!title || !!!description) {
         res.status(400).json({
-            message: 'Todos los campos son requeridos'
+            error: 'Todos los campos son requeridos'
         });
         return;
     }
@@ -33,7 +33,7 @@ const createQuestion = async (req, res) => {
 
     if (!!!typeQuestion || !!!question) {
         res.status(400).json({
-            message: 'Todos los campos son requeridos'
+            error: 'Todos los campos son requeridos'
         });
 
         return;
@@ -44,7 +44,7 @@ const createQuestion = async (req, res) => {
         const survey = await Survey.findById({ _id: req.params.id });
         if (!survey) {
             return res.status(404).json({
-                message: 'Encuesta no encontrada'
+                error: 'Encuesta no encontrada'
             })
         }
 
@@ -74,7 +74,7 @@ const getSurveys = async (req, res) => {
         res.status(200).json(surveys)
     } else {
         res.status(404).json({
-            message: 'Encuestas no encontradas'
+            error: 'Encuestas no encontradas'
         });
     }
 }
@@ -86,7 +86,7 @@ const getSurveyById = async (req, res) => {
         res.status(200).json(survey)
     } else {
         res.status(404).json({
-            message: 'Encuesta no encontrada'
+            error: 'Encuesta no encontrada'
         });
     }
 }
@@ -102,7 +102,7 @@ const updateSurvey = async (req, res) => {
         res.status(200).json(surveyUpdated)
 
     } catch (error) {
-        res.status(500).json('Error al actualizar la encuesta')
+        res.status(500).json({ error: 'Error al actualizar la encuesta' })
     }
 
 }
@@ -118,7 +118,7 @@ const updateQuestion = async (req, res) => {
             res.status(200).json(questionUpdated);
         } else {
             res.status(404).json({
-                message: 'Encuestas no encontradas'
+                error: 'Encuestas no encontradas'
             });
         }
 
@@ -138,7 +138,7 @@ const deleteSurvey = async (req, res) => {
         const survey = await Survey.findById(id);
         if (!survey) {
             return res.status(404).json({
-                message: 'Encuesta no encontrada'
+                error: 'Encuesta no encontrada'
             });
         }
         const userId = survey.idUser;
@@ -174,7 +174,7 @@ const deleteQuestion = async (req, res) => {
 
         if (!deleteQuestion) {
             return res.status(404).json({
-                message: 'Pregunta no encontrada'
+                error: 'Pregunta no encontrada'
             });
         }
 
@@ -243,7 +243,7 @@ const saveAnswers = async (req, res) => {
 
     } catch (error) {
         res.status(500).json({
-            'error': 'Eror al guardar las respuestas'
+            error: 'Eror al guardar las respuestas'
         });
     }
 }
