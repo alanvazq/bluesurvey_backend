@@ -5,10 +5,11 @@ const getUserInfo = require("../libs/getUserInfo");
 const getTokenFromHeader = require('../auth/getTokenFromHeader');
 const token = require('../models/token');
 const { verifyRefreshToken } = require('../auth/verifyToken');
+const { cleanData } = require('../libs/cleanData');
 
 const signUp = async (req, res) => {
 
-    const { name, email, password } = req.body;
+    const { name, email, password } = cleanData(req.body);
     if (!!!name || !!!email || !!!password) {
         return res.status(400).json({
             error: 'Todos los campos son requeridos'
@@ -39,7 +40,7 @@ const signUp = async (req, res) => {
 }
 
 const signIn = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password } = cleanData(req.body);
 
     if (!!!email || !!!password) {
         return res.status(400).json({

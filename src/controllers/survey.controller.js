@@ -1,9 +1,10 @@
 const Survey = require('../models/survey');
 const Question = require('../models/question');
 const User = require('../models/user');
+const { cleanData } = require('../libs/cleanData');
 
 const createSurvey = async (req, res) => {
-    const { title, description } = req.body;
+    const { title, description } = cleanData(req.body);
     if (!!!title || !!!description) {
         res.status(400).json({
             error: 'Todos los campos son requeridos'
