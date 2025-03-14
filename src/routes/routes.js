@@ -9,6 +9,8 @@ const router = express.Router();
 router.post('/signup', userController.signUp);
 //Inicio de sesión
 router.post('/signin', userController.signIn);
+//Cerrar sesión
+router.post('/signout', authenticate(), userController.signOut);
 //Obtener un usuario
 router.get('/user', authenticate(), userController.getUser);
 //Obtener todos los usuarios
@@ -36,13 +38,10 @@ router.post('/form', authenticate(false), surveyController.saveAnswers);
 //Refresh token
 router.post('/refresh-token', userController.refreshToken);
 //Obtener formulario publico
-router.get('/public/surveys/:id', authenticate(false),  surveyController.getSurveyById);
+router.get('/public/surveys/:id', authenticate(false), surveyController.getSurveyById);
 //Guardar respuestas
 router.post('/public/surveys', authenticate(false), surveyController.saveAnswers);
 
-
-//Cerrar sesión
-// router.post()
 
 module.exports = router;
 
