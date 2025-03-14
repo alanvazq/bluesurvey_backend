@@ -5,6 +5,7 @@ const getUserInfo = require("../libs/getUserInfo");
 const getTokenFromHeader = require('../auth/getTokenFromHeader');
 const token = require('../models/token');
 const { verifyRefreshToken } = require('../auth/verifyToken');
+
 const signUp = async (req, res) => {
 
     const { name, email, password } = req.body;
@@ -24,8 +25,8 @@ const signUp = async (req, res) => {
         }
 
         const role = await Role.findOne({ name: 'user' })
-
         const newUser = new User({ name, email, password: await User.encryptPassword(password), roles: [role._id] });
+
         newUser.save();
         res.status(201).json({
             message: 'Usuario creado correctamente'
@@ -46,38 +47,42 @@ const signIn = async (req, res) => {
         })
     }
 
-    const user = await User.findOne({ email }).populate('roles');
+    try {
+        const user = await User.findOne({ email }).populate('roles');
 
-    if (user) {
+        if (user) {
 
-        const correctPassword = await User.comparePassword(password, user.password)
+            const correctPassword = await User.comparePassword(password, user.password)
 
-        if (correctPassword) {
+            if (correctPassword) {
 
-            const accessToken = user.createAccessToken();
-            const refreshToken = await user.createRefreshToken();
+                const accessToken = user.createAccessToken();
+                const refreshToken = await user.createRefreshToken();
 
-            res.status(200).json({ user: getUserInfo(user), accessToken, refreshToken });
+                res.status(200).json({ user: getUserInfo(user), accessToken, refreshToken });
+
+            } else {
+                res.status(401).json({
+                    error: 'Correo o contraseña incorrecto'
+                });
+            }
 
         } else {
-            res.status(401).json({
-                error: 'Correo o contraseña incorrecto'
+            res.status(404).json({
+                error: 'Usuario no econtrado'
             });
         }
-
-    } else {
-        res.status(404).json({
-            error: 'Usuario no econtrado'
-        });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al iniciar sesión' })
     }
 }
 
 const getUser = (req, res) => {
     try {
-       res.status(200).json(req.user)
+        res.status(200).json(req.user)
     } catch (error) {
         res.status(500).json({
-            message: 'Error al obtener datos'
+            error: 'Error al obtener datos'
         })
     }
 }
@@ -89,7 +94,7 @@ const getAllUsers = async (req, res) => {
 
         if (!users) {
             res.status(404).json({
-                message: 'No se encontraron usuarios registrados'
+                error: 'No se encontraron usuarios registrados'
             })
         }
 
@@ -128,4 +133,17 @@ const refreshToken = async (req, res) => {
     }
 }
 
-module.exports = { signUp, signIn, getUser, getAllUsers, refreshToken }
+const signOut = async (req, res) => {
+    try {
+        const refreshToken = getTokenFromHeader(req.headers);
+        if (refreshToken) {
+            await token.findOneAndRemove({ token: refreshToken })
+            res.status(200).json({ message: "Token eliminado" })
+        }
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ error: "Error en el servidor" })
+    }
+}
+
+module.exports = { signUp, signIn, getUser, getAllUsers, refreshToken, signOut }
