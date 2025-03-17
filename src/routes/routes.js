@@ -11,6 +11,8 @@ router.post('/signup', userController.signUp);
 router.post('/signin', userController.signIn);
 //Cerrar sesión
 router.post('/signout', authenticate(), userController.signOut);
+//Crear admin
+router.post('/signup/admin', userController.createAdmin);
 //Obtener un usuario
 router.get('/user', authenticate(), userController.getUser);
 //Obtener todos los usuarios

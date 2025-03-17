@@ -28,7 +28,7 @@ const signUp = async (req, res) => {
         const role = await Role.findOne({ name: 'user' })
         const newUser = new User({ name, email, password: await User.encryptPassword(password), roles: [role._id] });
 
-        newUser.save();
+        await newUser.save();
         res.status(201).json({
             message: 'Usuario creado correctamente'
         });
@@ -147,4 +147,26 @@ const signOut = async (req, res) => {
     }
 }
 
-module.exports = { signUp, signIn, getUser, getAllUsers, refreshToken, signOut }
+const createAdmin = async (req, res) => {
+    const { name, email, password, secretKey } = cleanData(req.body);
+    if (!name || !email || !password || !secretKey) return res.status(400).json({ error: "Todos los campos son requeridos" })
+
+    if (secretKey !== process.env.ADMIN_SECRET_KEY) return res.status(401).json({ error: "No autorizado" })
+
+    try {
+        const existingAdmin = await User.findOne({ email });
+        if (existingAdmin) return res.status(400).json({ error: "El admin ya existe" });
+
+        const role = await Role.findOne({ name: 'admin' })
+        const newAdmin = new User({ name, email, password: await User.encryptPassword(password), roles: [role._id] });
+
+        await newAdmin.save();
+        res.status(201).json({ message: 'Admin registrado correctamente' });
+    } catch (error) {
+        res.status(500).json({
+            error: 'Error al crear el usuario'
+        });
+    }
+}
+
+module.exports = { signUp, signIn, getUser, getAllUsers, refreshToken, signOut, createAdmin }
