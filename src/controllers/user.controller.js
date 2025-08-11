@@ -78,9 +78,15 @@ const signIn = async (req, res) => {
     }
 }
 
-const getUser = (req, res) => {
+const getUser = async (req, res) => {
     try {
-        res.status(200).json(req.user)
+
+        const { id, name, email } = req.user;
+
+        const accessToken = generateAccessToken(req.user);
+        const refreshToken = generateRefreshToken(req.user);
+        const user = { user: { id, name, email }, accessToken: accessToken, refreshToken: refreshToken }
+        res.status(200).json(user)
     } catch (error) {
         res.status(500).json({
             error: 'Error al obtener datos'
@@ -138,15 +144,21 @@ const signOut = async (req, res) => {
     try {
         const refreshToken = getTokenFromHeader(req.headers);
         if (refreshToken) {
-            await token.findOneAndRemove({ token: refreshToken })
-            res.status(200).json({ message: "Token eliminado" })
+            const deletedToken = await token.findOneAndDelete({ token: refreshToken });
+
+            if (deletedToken) {
+                res.status(200).json({ message: "Fin de la sesión" });
+            } else {
+                res.status(404).json({ error: "Error al cerrar la sesión" });
+            }
+        } else {
+            res.status(400).json({ message: "Token no proporcionado" });
         }
     } catch (error) {
-        console.log(error)
-        res.status(500).json({ error: "Error en el servidor" })
+        console.error(error);
+        res.status(500).json({ error: "Error en el servidor" });
     }
-}
-
+};
 const createAdmin = async (req, res) => {
     const { name, email, password, secretKey } = cleanData(req.body);
     if (!name || !email || !password || !secretKey) return res.status(400).json({ error: "Todos los campos son requeridos" })

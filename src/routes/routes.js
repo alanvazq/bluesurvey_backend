@@ -10,7 +10,7 @@ router.post('/signup', userController.signUp);
 //Inicio de sesión
 router.post('/signin', userController.signIn);
 //Cerrar sesión
-router.post('/signout', authenticate(), userController.signOut);
+router.delete('/signout', userController.signOut);
 //Crear admin
 router.post('/signup/admin', userController.createAdmin);
 //Obtener un usuario
@@ -32,7 +32,7 @@ router.put('/surveys/:id/questions', authenticate(), surveyController.updateQues
 //Eliminar encuestas
 router.delete('/surveys/:id', authenticate(), surveyController.deleteSurvey);
 //Eliminar pregunta
-router.delete('/surveys/:surveyId/questions/:questionId', authenticate(), surveyController.deleteQuestion);
+router.delete('/surveys/:id/questions', authenticate(), surveyController.deleteQuestion);
 //Obtener encuestas para formulario
 router.get('/form/:id', authenticate(false), surveyController.getSurveyById);
 //Guardar respuestas de los usuarios

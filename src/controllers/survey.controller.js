@@ -5,7 +5,7 @@ const { cleanData } = require('../libs/cleanData');
 
 const createSurvey = async (req, res) => {
     const { title, description } = cleanData(req.body);
-    if (!!!title || !!!description) {
+    if (!title || !description) {
         res.status(400).json({
             error: 'Todos los campos son requeridos'
         });
@@ -31,7 +31,6 @@ const createSurvey = async (req, res) => {
 
 const createQuestion = async (req, res) => {
     const { typeQuestion, question, answers } = req.body;
-
     if (!!!typeQuestion || !!!question) {
         res.status(400).json({
             error: 'Todos los campos son requeridos'
@@ -39,7 +38,6 @@ const createQuestion = async (req, res) => {
 
         return;
     }
-
     try {
 
         const survey = await Survey.findById({ _id: req.params.id });
@@ -168,7 +166,8 @@ const deleteSurvey = async (req, res) => {
 }
 
 const deleteQuestion = async (req, res) => {
-    const { surveyId, questionId } = req.params;
+    const { id } = req.params;
+    const { questionId } = req.body;
 
     try {
         const deleteQuestion = await Question.findByIdAndDelete(questionId);
@@ -180,7 +179,7 @@ const deleteQuestion = async (req, res) => {
         }
 
         const updatedSurvey = await Survey.findByIdAndUpdate(
-            surveyId,
+            id,
             { $pull: { questions: questionId } },
             { new: true }
         ).populate('questions');
